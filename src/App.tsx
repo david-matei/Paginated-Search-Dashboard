@@ -11,12 +11,17 @@ export default function App() {
     if (error) return <p>{error.message}</p>
     if (loading) return <p>Loading...</p>
     const normalizedSearch = search.toLowerCase()
-
+    // search users / filter users
     const filteredUsers = data?.filter(user =>
         user.email.toLowerCase().includes(normalizedSearch) ||
         user.name.toLowerCase().includes(normalizedSearch) ||
         user.username.toLowerCase().includes(normalizedSearch)
     ) ?? []
+    // pagination
+    // we take the first 5 indexes from our users and display them
+    // when we go next/back within the pages, we basically take the next/previous 5 indexes (users) and display them
+    // this is derived from the data(users state)
+    // when we go next/back within the pages, we set the page state to a new value and that triggers a re-render, now it automatically calculates the new users based on the new page state - this concept is called derived state and so we avoid creating new state
     const start = (page - 1) * 5
     const end = page * 5
     const usersForPage = filteredUsers.slice(start, end)
