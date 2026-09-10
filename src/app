@@ -1,0 +1,52 @@
+                 INITIAL LOAD
+                      │
+                      ▼
+                 fetch 10 users
+                      │
+                      ▼
+                  setData()
+                      │
+                      ▼
+                   RERENDER
+                      │
+                      ▼
+              ┌───────────────┐
+              │  data         │
+              │  search       │
+              │  page         │
+              └───────┬───────┘
+                      │
+                      ▼
+              filter(data, search)
+                      │
+                      ▼
+              slice(filtered, page)
+                      │
+                      ▼
+                     UI
+                      │
+          ┌───────────┴───────────┐
+          │                       │
+       click Next             type search
+          │                       │
+          ▼                       ▼
+       setPage()             setSearch()
+                                  +
+                              setPage(1)
+          │                       │
+          └───────────┬───────────┘
+                      ▼
+                   RERENDER
+                      │
+                      ▼
+              recalculate derived
+                    values
+                      │
+                      ▼
+              React reconciles UI
+                      │
+                      ▼
+                 DOM updates
+                      │
+                      ▼
+               Browser paints
