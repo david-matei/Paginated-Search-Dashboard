@@ -1,75 +1,121 @@
-# React + TypeScript + Vite
+# Challenge #4 — Paginated Search Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+A React + TypeScript user dashboard that fetches users from an external API and provides client-side search and pagination.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The project focuses on coordinating multiple pieces of React state while keeping derived data out of state.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* Fetches users from the JSONPlaceholder API
+* Displays loading and error states
+* Searches users by:
 
-## Expanding the ESLint configuration
+  * Name
+  * Username
+  * Email
+* Case-insensitive search
+* Client-side pagination with 5 users per page
+* Previous/Next pagination controls
+* Automatically resets to page 1 when the search changes
+* Disables Previous on the first page
+* Disables Next on the last page or when no results exist
+* Displays the number of users currently shown
+* Displays an empty state when no users match the search
+* Separates user rendering into reusable `UserList` and `UserCard` components
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Component Hierarchy
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+App
+├── SearchInput
+└── UserList
+    └── UserCard
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## State
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The application uses two independent pieces of state:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```ts
+const [search, setSearch] = useState("")
+const [page, setPage] = useState(1)
 ```
+
+* `search` stores the current search query.
+* `page` stores the current pagination page.
+
+The actual filtered and paginated users are **derived during rendering** rather than stored in state.
+
+## Data Flow
+
+```text
+API
+ ↓
+All users
+ ↓
+Filter by search query
+ ↓
+Slice results for current page
+ ↓
+UserList
+ ↓
+UserCard
+```
+
+Search changes also reset pagination:
+
+```text
+User types a search
+ ↓
+setSearch()
+ ↓
+setPage(1)
+ ↓
+Component rerenders
+ ↓
+Filtered results are recalculated
+ ↓
+First page is displayed
+```
+
+## Pagination
+
+Each page contains 5 users.
+
+The displayed section of the filtered array is calculated using:
+
+```ts
+const start = (page - 1) * 5
+const end = page * 5
+
+const usersForPage = filteredUsers.slice(start, end)
+```
+
+The last page is calculated with:
+
+```ts
+Math.ceil(filteredUsers.length / 5)
+```
+
+This allows the Next button to be disabled when the current page is the final page.
+
+## Concepts Practiced
+
+* React state
+* State ownership
+* Controlled inputs
+* Derived data
+* Array `filter()`
+* Array `slice()`
+* Client-side pagination
+* Conditional rendering
+* Component composition
+* Props and TypeScript prop types
+* Functional state updates
+* Handling loading/error/empty states
+* Coordinating multiple state updates
+* Avoiding unnecessary state
+* Case-insensitive string searching
+* Pagination boundaries
